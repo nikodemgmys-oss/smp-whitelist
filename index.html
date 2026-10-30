@@ -1,1 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Android Recovery</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
 
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 16px;
+      overflow: hidden;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .header {
+      color: #00e676;
+      font-weight: bold;
+      border-bottom: 1px solid #333;
+      padding-bottom: 8px;
+    }
+
+    .device-info {
+      color: #888;
+      font-size: 11px;
+      margin-top: 4px;
+    }
+
+    .center-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 40px 0;
+    }
+
+    .robot-icon {
+      width: 90px;
+      height: 90px;
+      margin-bottom: 20px;
+    }
+
+    .alert-headline {
+      color: #ff3b30;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { opacity: 1; }
+      to { opacity: 0.4; }
+    }
+
+    .sub-headline {
+      color: #ccc;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .console-logs {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11.5px;
+    }
+
+    .log-err {
+      color: #ff453a;
+    }
+
+    .log-warn {
+      color: #ffd60a;
+    }
+
+    .log-dim {
+      color: #777;
+    }
+
+    .log-active {
+      color: #30d158;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 7px;
+      height: 12px;
+      background: #ff453a;
+      vertical-align: middle;
+      animation: blink 0.7s infinite;
+    }
+
+    @keyframes blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div>
+    <div class="header">Android Recovery</div>
+    <div class="device-info">google/oriole/oriole:14/UP1A.231105.003/11010452</div>
+    <div class="device-info">sec_boot: ENABLED | knox: 0x1 (tampered)</div>
+  </div>
+
+  <div class="center-stage">
+    <svg class="robot-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+      <line x1="12" y1="9" x2="12" y2="13"/>
+      <line x1="12" y1="17" x2="12.01" y2="17"/>
+    </svg>
+    <div class="alert-headline">No Command / System Halt</div>
+    <div class="sub-headline">Storage Block Integrity Compromised</div>
+  </div>
+
+  <div class="console-logs" id="logBox">
+    <div class="log-dim">-- Verifying internal storage blocks --</div>
+    <div class="log-dim">Mounting /system_root... OK</div>
+    <div class="log-warn">E:[libfs_mgr] Partition verification failed on block /dev/block/bootdevice/by-name/userdata</div>
+    <div class="log-err">E:SHA256 signature mismatch: 0x88F0CA21B</div>
+    <div class="log-err">E:Fatal signature violation in critical system image</div>
+  </div>
+
+  <script>
+    const logBox = document.getElementById("logBox");
+
+    const sequence = [
+      { text: "E:Corrupt superblock detected on /data", class: "log-err", delay: 900 },
+      { text: ">> Forcing read-only lockdown...", class: "log-warn", delay: 1800 },
+      { text: "E:Unable to mount encrypted credentials database", class: "log-err", delay: 2800 },
+      { text: "I:Factory reset required to restore boot partition", class: "log-active", delay: 3800 },
+      { text: "SYSTEM LOCKED: 0x000000FF_CORRUPT_STORAGE", class: "log-err", delay: 4800 }
+    ];
+
+    sequence.forEach(entry => {
+      setTimeout(() => {
+        const div = document.createElement("div");
+        div.className = entry.class;
+        div.textContent = entry.text;
+        logBox.appendChild(div);
+      }, entry.delay);
+    });
+
+    setTimeout(() => {
+      const cursorDiv = document.createElement("div");
+      cursorDiv.innerHTML = '<span class="cursor"></span>';
+      logBox.appendChild(cursorDiv);
+    }, 5500);
+  </script>
+</body>
+</html>
