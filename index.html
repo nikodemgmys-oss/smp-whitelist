@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Android Recovery</title>
+  <title>Lakeview Fishing Simulator</title>
   <style>
     * {
       box-sizing: border-box;
@@ -12,156 +12,305 @@
       user-select: none;
     }
 
-    body {
-      background-color: #000;
-      color: #fff;
-      font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
+    body, html {
+      width: 100%;
+      height: 100%;
       overflow: hidden;
-      font-size: 13px;
-      line-height: 1.45;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0d1b2a;
     }
 
-    .header {
+    /* ================= FISHING GAME ================= */
+    #game-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      background: linear-gradient(to bottom, #1b263b 0%, #415a77 40%, #0d3b66 60%, #001845 100%);
+      color: #fff;
+      position: relative;
+      cursor: pointer;
+    }
+
+    #game-header {
+      margin-top: 25px;
+      text-align: center;
+      z-index: 5;
+    }
+
+    #game-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+    }
+
+    #tip-box {
+      font-size: 13px;
+      color: #a8dadc;
+      margin-top: 6px;
+    }
+
+    #water-area {
+      position: relative;
+      width: 100%;
+      height: 55%;
+      overflow: hidden;
+    }
+
+    /* Bobber */
+    #bobber {
+      width: 22px;
+      height: 22px;
+      background: radial-gradient(circle at 35% 35%, #ff4d4d 50%, #ffffff 51%);
+      border-radius: 50%;
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+      animation: bob 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+      50% { transform: translate(-50%, -50%) translateY(7px); }
+    }
+
+    #ripple {
+      position: absolute;
+      top: 40%;
+      left: 50%;
+      width: 40px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: rip 2s infinite ease-out;
+    }
+
+    @keyframes rip {
+      0% { width: 10px; height: 5px; opacity: 1; }
+      100% { width: 90px; height: 35px; opacity: 0; }
+    }
+
+    #status-card {
+      background: rgba(0, 0, 0, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 12px 24px;
+      border-radius: 20px;
+      margin-bottom: 35px;
+      font-size: 14px;
+      backdrop-filter: blur(4px);
+      z-index: 5;
+    }
+
+    /* ================= WINDOWS BSOD ================= */
+    #bsod-screen {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background-color: #0078d7;
+      color: #ffffff;
+      padding: 10vw;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      z-index: 99999;
+      cursor: none;
+    }
+
+    .bsod-sad {
+      font-size: 7.5rem;
+      margin-bottom: 25px;
+      font-weight: 300;
+      line-height: 1;
+    }
+
+    .bsod-lead {
+      font-size: 1.6rem;
+      line-height: 1.4;
+      max-width: 850px;
+      margin-bottom: 25px;
+    }
+
+    .bsod-percent {
+      font-size: 1.6rem;
+      margin-bottom: 35px;
+    }
+
+    .bsod-footer {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      margin-top: 15px;
+    }
+
+    .fake-qr {
+      width: 90px;
+      height: 90px;
+      background: #ffffff;
+      padding: 6px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-gap: 3px;
+    }
+
+    .fake-qr div {
+      background: #0078d7;
+    }
+
+    .bsod-details {
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+
+    /* ================= ANDROID RECOVERY ================= */
+    #android-screen {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: #000;
+      color: #fff;
+      font-family: 'Roboto Mono', monospace;
+      padding: 16px;
+      flex-direction: column;
+      justify-content: space-between;
+      font-size: 13px;
+      z-index: 99999;
+    }
+
+    .rec-header {
       color: #00e676;
       font-weight: bold;
       border-bottom: 1px solid #333;
-      padding-bottom: 8px;
+      padding-bottom: 6px;
     }
 
-    .device-info {
-      color: #888;
-      font-size: 11px;
-      margin-top: 4px;
-    }
-
-    .center-stage {
+    .rec-center {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      margin: 40px 0;
     }
 
-    .robot-icon {
-      width: 90px;
-      height: 90px;
-      margin-bottom: 20px;
-    }
-
-    .alert-headline {
+    .rec-warn {
       color: #ff3b30;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: bold;
+      margin-top: 15px;
       letter-spacing: 1px;
-      text-transform: uppercase;
-      animation: pulse 1s infinite alternate;
-    }
-
-    @keyframes pulse {
-      from { opacity: 1; }
-      to { opacity: 0.4; }
-    }
-
-    .sub-headline {
-      color: #ccc;
-      font-size: 12px;
-      margin-top: 6px;
-    }
-
-    .console-logs {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      font-size: 11.5px;
-    }
-
-    .log-err {
-      color: #ff453a;
-    }
-
-    .log-warn {
-      color: #ffd60a;
-    }
-
-    .log-dim {
-      color: #777;
-    }
-
-    .log-active {
-      color: #30d158;
-    }
-
-    .cursor {
-      display: inline-block;
-      width: 7px;
-      height: 12px;
-      background: #ff453a;
-      vertical-align: middle;
-      animation: blink 0.7s infinite;
-    }
-
-    @keyframes blink {
-      0%, 49% { opacity: 1; }
-      50%, 100% { opacity: 0; }
     }
   </style>
 </head>
 <body>
 
-  <div>
-    <div class="header">Android Recovery</div>
-    <div class="device-info">google/oriole/oriole:14/UP1A.231105.003/11010452</div>
-    <div class="device-info">sec_boot: ENABLED | knox: 0x1 (tampered)</div>
+  <!-- Game Canvas / UI -->
+  <div id="game-stage">
+    <div id="game-header">
+      <div id="game-title">Lakeview Fisher v1.4</div>
+      <div id="tip-box">Click anywhere on the lake to cast your line</div>
+    </div>
+
+    <div id="water-area">
+      <div id="ripple"></div>
+      <div id="bobber"></div>
+    </div>
+
+    <div id="status-card">Rod Ready &bull; Tap lake to cast</div>
   </div>
 
-  <div class="center-stage">
-    <svg class="robot-icon" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
-      <line x1="12" y1="9" x2="12" y2="13"/>
-      <line x1="12" y1="17" x2="12.01" y2="17"/>
-    </svg>
-    <div class="alert-headline">No Command / System Halt</div>
-    <div class="sub-headline">Storage Block Integrity Compromised</div>
+  <!-- Windows BSOD Screen -->
+  <div id="bsod-screen">
+    <div class="bsod-sad">:(</div>
+    <div class="bsod-lead">Your device ran into a problem and needs to restart. We're just collecting some error info, and then we'll restart for you.</div>
+    <div class="bsod-percent"><span id="pct">0</span>% complete</div>
+    <div class="bsod-footer">
+      <div class="fake-qr">
+        <div></div><div></div><div style="background:transparent;"></div><div></div><div></div>
+        <div></div><div style="background:transparent;"></div><div></div><div style="background:transparent;"></div><div></div>
+        <div></div><div></div><div></div><div></div><div></div>
+      </div>
+      <div class="bsod-details">
+        For more information about this issue and possible fixes, visit https://www.windows.com/stopcode<br><br>
+        If you call a support person, give them this info:<br>
+        Stop code: CRITICAL_PROCESS_DIED
+      </div>
+    </div>
   </div>
 
-  <div class="console-logs" id="logBox">
-    <div class="log-dim">-- Verifying internal storage blocks --</div>
-    <div class="log-dim">Mounting /system_root... OK</div>
-    <div class="log-warn">E:[libfs_mgr] Partition verification failed on block /dev/block/bootdevice/by-name/userdata</div>
-    <div class="log-err">E:SHA256 signature mismatch: 0x88F0CA21B</div>
-    <div class="log-err">E:Fatal signature violation in critical system image</div>
+  <!-- Android Recovery Screen -->
+  <div id="android-screen">
+    <div>
+      <div class="rec-header">Android Recovery</div>
+      <div style="color: #888; font-size: 11px; margin-top: 4px;">google/oriole/oriole:14/UP1A.231105.003</div>
+      <div style="color: #888; font-size: 11px;">sec_boot: ENABLED | knox: 0x1</div>
+    </div>
+
+    <div class="rec-center">
+      <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#ff3b30" stroke-width="1.8">
+        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/>
+        <line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <div class="rec-warn">No Command / Kernel Panic</div>
+      <div style="font-size: 12px; color: #aaa; margin-top: 6px;">Mount point /data corrupted</div>
+    </div>
+
+    <div id="android-logs" style="font-size: 11px; color: #ff453a;">
+      <div>E:[libfs_mgr] Partition table integrity failure</div>
+      <div>E:I/O Error on sector 0x90432</div>
+      <div>SYSTEM HALTED.</div>
+    </div>
   </div>
 
   <script>
-    const logBox = document.getElementById("logBox");
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) || ('ontouchstart' in window);
+    const gameStage = document.getElementById('game-stage');
+    const tipBox = document.getElementById('tip-box');
+    const statusCard = document.getElementById('status-card');
+    const bsod = document.getElementById('bsod-screen');
+    const androidScreen = document.getElementById('android-screen');
+    const pct = document.getElementById('pct');
 
-    const sequence = [
-      { text: "E:Corrupt superblock detected on /data", class: "log-err", delay: 900 },
-      { text: ">> Forcing read-only lockdown...", class: "log-warn", delay: 1800 },
-      { text: "E:Unable to mount encrypted credentials database", class: "log-err", delay: 2800 },
-      { text: "I:Factory reset required to restore boot partition", class: "log-active", delay: 3800 },
-      { text: "SYSTEM LOCKED: 0x000000FF_CORRUPT_STORAGE", class: "log-err", delay: 4800 }
-    ];
+    if (!isMobile) {
+      tipBox.textContent = "Click anywhere to cast & enter Fullscreen (F11)";
+    }
 
-    sequence.forEach(entry => {
+    let gameStarted = false;
+
+    gameStage.addEventListener('click', () => {
+      if (gameStarted) return;
+      gameStarted = true;
+
+      // Request fullscreen on PC interaction
+      if (!isMobile && document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      }
+
+      statusCard.textContent = "Line cast! Waiting for fish to bite...";
+
+      // Trigger crash after 10 seconds
       setTimeout(() => {
-        const div = document.createElement("div");
-        div.className = entry.class;
-        div.textContent = entry.text;
-        logBox.appendChild(div);
-      }, entry.delay);
-    });
+        gameStage.style.display = 'none';
 
-    setTimeout(() => {
-      const cursorDiv = document.createElement("div");
-      cursorDiv.innerHTML = '<span class="cursor"></span>';
-      logBox.appendChild(cursorDiv);
-    }, 5500);
+        if (isMobile) {
+          androidScreen.style.display = 'flex';
+        } else {
+          bsod.style.display = 'block';
+
+          // Animate BSOD percentage counter up to 100%
+          let count = 0;
+          const progressInterval = setInterval(() => {
+            count += Math.floor(Math.random() * 12) + 3;
+            if (count >= 100) {
+              count = 100;
+              clearInterval(progressInterval);
+            }
+            pct.textContent = count;
+          }, 1500);
+        }
+      }, 10000);
+    });
   </script>
 </body>
 </html>
